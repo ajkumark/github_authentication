@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block title %}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-4">
+                <p>Welcome {{ user.username }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-4">
+                <img src="{{ user.avatar_url }}" class="img-responsive">
+            </div>
+            <div class="col-md-8">  
+                <button class="btn btn-primary create" href="#">Create Repository</button>
+            </div>
+        </div>
+    </div>
+    <form>{% csrf_token %}
+    <div class="row repo_div">
+        <div class="alert alert-success" role="alert"><p>You have succesfully created a repo, click Github Account link to view it in your Github account</p></div>
+        <div class="alert alert-danger" role="alert"></div>
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="repo_name">Repository Name</label>
+                <input type="text" class="form-control" id="repo_name" placeholder="Enter Name of the repository">
+            </div>
+            <div class="form-group">
+                <label for="repo_description">Repository Description</label>
+                <textarea class="form-control" id="repo_description" placeholder="Explain briefly about your repo"></textarea>
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" value="true" id="repo_type">Private
+                </label>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-success" data-loading-text="Loading..." id="create_repo">Create Repository</button>
+            </div>
+        </div>
+    </div>
+    </form>
+{% endblock %}
+
+{% block custom_js %}
+    <script type="text/javascript">
+        $('.create').click(function(e){
+            $('.repo_div').show();
+        });
+
+        $('#create_repo').click(function(e){
+            repo_name = $.trim($('#repo_name').val());
+            repo_description = $('#repo_description').val();
+            repo_type = $('#repo_type').is(":checked")
+            if (repo_name == ""){
+                alert('Please enter a respository name');
+                return false;
+            }
+            else{
+                var $btn = $(this).button('loading')
+                $.ajax({
+                    "type":"post",
+                    "url":"{% url 'create_repo' %}",
+                    "data":{
+                        'repo_name':repo_name,
+                        'repo_description':repo_description,
+                        'repo_type':repo_type,
+                        "csrfmiddlewaretoken": $("input[name='csrfmiddlewaretoken']").val()
+                    },
+                    "success": function(data){
+                        data = $.parseJSON(data);
+                        $btn.button('reset');
+                        if (data.result == 'success'){
+                            $('.alert-danger').hide()
+                            $('.alert-success').show();
+                            $('#repo_name').val("");
+                            $('#repo_description').val("");
+                        }
+                        else{
+                            $('.alert-success').hide();
+                            $('.alert-danger').html(data.message).show();
+                        }
+                    }
+                })
+            }
+        });
+    </script>
+{% endblock %}

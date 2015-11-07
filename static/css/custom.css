@@ -1,0 +1,15 @@
+body {
+	padding-top: 50px;
+}
+
+.repo_div{
+	display: none;
+}
+
+.alert-success, .alert-danger{
+	display: none;
+}
+
+.content{
+	top: 75px;
+}
